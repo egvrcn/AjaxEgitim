@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 class="page-header text-center">Ajax Eğitim</h1>
+
+        <table class="table table-bordered" id="tblMusteri">
+            <thead>
+                <tr>
+                    <th>Kullanıcı Adı</th>
+                    <th>Ad Soyad</th>
+                    <th>Şirket Adı</th>
+                    <th>Adres</th>
+                    <th>Detay</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- <tr>
+                    <td>K.Adı</td>
+                    <td>Adı</td>
+                    <td>Şirket</td>                    
+                    <td>Adres</td>
+                </tr> -->
+            </tbody>
+        </table>
+
+
+        <!-- Modal
+        Modal Açma: $('#myModal').modal();
+        -->        
+
+        <div id="myModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Detay Bilgileri</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Adı Soyadı:</p>
+                        <p id="txtAdSoyad"></p>
+                        <hr>
+                        <p>Ülke:</p>
+                        <p id="txtUlke"></p>
+                        <hr>
+                        <p>Şehir:</p>
+                        <p id="txtCity"></p>
+                        <hr>
+                        <p>Posta Kodu:</p>
+                        <p id="txtPostaKodu"></p>
+                        <hr>
+                        <p>Telefon:</p>
+                        <p id="txtTelefon"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //Klasik bir ajax mimarisi
+        /* $.ajax({
+            type: 'GET', //GET yada Post
+            url: 'http://example/functions.php',  //Servise bağlanılacak url
+            data: { get_param: 'value' },  //Parametre geçişi - tamamı çekilecekse boş bırakılabilir
+            dataType: 'json', 
+            success: function (data) {
+                //Sonuç Başarılıdır
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) { 
+                alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+                //Başarısız olma durumu
+            }       
+        }); */
+
+        $(document).ready(function () {
+            MusteriListesi();
+        });
+
+        function MusteriListesi() {
+            $.ajax({
+                type: 'GET', //GET yada Post
+                url: 'http://northwind.servicestack.net/customers?format=json',  //Servise bağlanılacak url
+                //data: { get_param: 'value' },  //Parametre geçişi - tamamı çekilecekse boş bırakılabilir
+                dataType: 'json',
+                success: function (data) {
+                    //Sonuç Başarılıdır
+                    console.log(data.Customers);
+                    var htmlData = "";
+                    for (var i = 0; i < data.Customers.length; i++) {
+                        htmlData += "<tr>" +
+                            "<td>" + data.Customers[i].Id + "</td>" +
+                            "<td>" + data.Customers[i].ContactName + "</td>" +
+                            "<td>" + data.Customers[i].CompanyName + "</td>" +
+                            "<td>" + data.Customers[i].Address + "</td>" +
+                            "<td><button class='btn btn-primary' onclick=\"MusteriGetir('"+data.Customers[i].Id+"')\">Detay</button></td>" +
+                            "</tr>";
+                    }
+                    $('#tblMusteri tbody').html(htmlData);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("Status: " + textStatus); alert("Error: " + errorThrown);
+                    //Başarısız olma durumu
+                }
+            });
+        }
+
+        function MusteriGetir(kullaniciId){            
+            $.ajax({
+                type: 'GET', //GET yada Post
+                url: 'http://northwind.servicestack.net/query/customers',  //Servise bağlanılacak url
+                data: ({ Id: kullaniciId }),  //Parametre geçişi - tamamı çekilecekse boş bırakılabilir
+                dataType: 'json',
+                success: function (data) {
+                    //Sonuç Başarılıdır
+                    var kisiBilgileri = data.Results[0];
+                    console.log(kisiBilgileri);
+                    $('#txtAdSoyad').text(kisiBilgileri.ContactName);  
+                    $('#txtUlke').text(kisiBilgileri.Country);  
+                    $('#txtCity').text(kisiBilgileri.City);  
+                    $('#txtPostaKodu').text(kisiBilgileri.PostalCode);  
+                    $('#txtTelefon').text(kisiBilgileri.Phone);  
+
+                    $('#myModal').modal();
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("Status: " + textStatus); alert("Error: " + errorThrown);
+                    //Başarısız olma durumu
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>
